@@ -421,7 +421,7 @@
 
             submitBtn.disabled = true;
             submitBtn.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -459,28 +459,26 @@
                 .then(() => {
                     fetch(SCRIPT_URL, {
                         method: 'POST',
-                        // body is a string, so we need to use 'text/plain'
-                        mode: 'no-cors', // IMPORTANT: Use no-cors mode for Apps Script
                         body: JSON.stringify(submissionData),
                         headers: {
-                            'Content-Type': 'text/plain;charset=utf-8', // Send as plain text
+                            'Content-Type': 'application/json',
                         },
                     })
-                    // Because of 'no-cors', we can't read the response. 
-                    // We will assume success if the request doesn't throw an error.
-                    .then(() => {
-                        console.log("Request sent to Apps Script.");
-                        // Simulate a short delay to allow the script to process
-                        setTimeout(() => {
-                           document.getElementById('submitter-info').classList.add('hidden');
-                           document.querySelector('main').classList.add('hidden');
-                           document.getElementById('submit-btn').classList.add('hidden');
-                           document.getElementById('success-message').classList.remove('hidden');
-                        }, 1500); // Wait 1.5 seconds before showing success
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            document.getElementById('submitter-info').classList.add('hidden');
+                            document.querySelector('main').classList.add('hidden');
+                            document.getElementById('submit-btn').classList.add('hidden');
+                            document.getElementById('success-message').classList.remove('hidden');
+                        } else {
+                            // Now we can show the real error message from the server!
+                            throw new Error(data.message || 'Một lỗi không xác định đã xảy ra.');
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showAlert('Đã có lỗi xảy ra khi gửi hồ sơ. Vui lòng thử lại.');
+                        showAlert(`Đã có lỗi xảy ra: ${error.message}. Vui lòng thử lại.`);
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = 'Gửi Toàn Bộ Hồ Sơ';
                         submitBtn.classList.remove('inline-flex', 'items-center', 'justify-center');
