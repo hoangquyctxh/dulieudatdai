@@ -10,31 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-        }
-        .file-info {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            margin-top: 0.75rem;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .file-info { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border-radius: 0.5rem; background-color: #f8f9fa; border: 1px solid #e9ecef; margin-top: 0.75rem; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -70,7 +49,7 @@
         <main class="bg-white p-6 rounded-2xl shadow-lg">
              <h2 class="text-2xl font-bold mb-6 border-b pb-4 text-slate-900">II. Tải Lên Giấy Tờ</h2>
              <div class="space-y-6">
-                <!-- Section 1 -->
+                 <!-- Section 1 -->
                 <div class="upload-section border border-slate-200 p-4 rounded-lg" data-type="certificate">
                     <p class="font-semibold text-lg">1. Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở</p>
                     <p class="text-sm text-slate-500 mb-4">(Bản phô tô hoặc ảnh chụp đầy đủ các trang)</p>
@@ -115,9 +94,7 @@
         </div>
 
         <div id="success-message" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg mt-8">
-             <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+             <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <h2 class="text-2xl font-bold mt-4 text-slate-900">Gửi Hồ Sơ Thành Công!</h2>
             <p class="mt-2 text-slate-600">Cảm ơn bạn đã cung cấp hồ sơ. Chúng tôi sẽ xem xét và liên hệ lại với bạn nếu cần thêm thông tin.</p>
         </div>
@@ -149,13 +126,14 @@
     </div>
 
     <script>
+        // SCRIPT ĐÃ ĐƯỢC CẬP NHẬT VỚI URL MỚI NHẤT CỦA BẠN
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz96u7m_0bk2wfLOTiAICccZhjpLEGR70Gp_KydqMeeEO350nym5wQ7l4gwIuR7CP8g6A/exec";
         
         const uploadedFiles = { certificate: null, idCard: null, otherDocs: null };
         let currentUploadSection = null;
         let capturedPhotos = [];
 
-        // --- Event Listeners and UI handlers (No changes needed here) ---
+        // --- Event Listeners and UI handlers (No changes) ---
         document.querySelectorAll('.upload-section').forEach(section => {
             section.querySelector('.upload-btn').addEventListener('click', () => section.querySelector('.file-input').click());
             section.querySelector('.file-input').addEventListener('change', (event) => handleFileSelect(event, section));
@@ -272,18 +250,16 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
                     body: JSON.stringify(payload),
-                    redirect: 'follow'
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Lỗi từ máy chủ: ${response.status}`);
+                    throw new Error(`Lỗi kết nối đến máy chủ: ${response.statusText} (${response.status})`);
                 }
                 
-                // IMPORTANT: Now we read the response to confirm success from the script
                 const result = await response.json();
 
                 if (result.status !== 'success') {
-                    throw new Error(result.message);
+                    throw new Error(result.message || "Máy chủ báo lỗi không xác định.");
                 }
                 
                 statusEl.textContent = 'Hoàn tất!';
