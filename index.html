@@ -1,283 +1,229 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cổng Tải Lên Hồ Sơ Đất Đai</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <style>
-        body { font-family: 'Be Vietnam Pro', sans-serif; }
-        .file-info { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border-radius: 0.5rem; background-color: #f8f9fa; border: 1px solid #e9ecef; margin-top: 0.75rem; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hệ thống Kê khai Thông tin Đất đai</title>
+<style>
+:root{--pri:#0d47a1;--pri2:#1976d2;--ok:#2e7d32;--err:#c62828;--bg:#f5f7fa;--txt:#243039;--bd:#e0e0e0}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+header{display:flex;gap:12px;align-items:center;padding:14px 18px;background:#fff;border-bottom:3px solid var(--pri)}
+header img{width:44px;height:44px;object-fit:contain}
+h1{font-size:18px;margin:0;color:var(--pri)}
+.container{max-width:860px;margin:18px auto;background:#fff;border:1px solid #ecf0f3;border-radius:12px;box-shadow:0 2px 10px #00000010;padding:18px}
+.stepper{display:flex;gap:10px;justify-content:space-between;margin:4px 0 14px}
+.stepper .dot{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.stepper .circle{width:34px;height:34px;border:3px solid #b0bec5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#90a4ae;background:#fff}
+.stepper .label{font-weight:700;font-size:14px;color:#90a4ae}
+.stepper .dot.active .circle{border-color:var(--pri);background:var(--pri);color:#fff}
+.stepper .dot.active .label{color:var(--pri)}
+.stepper .dot.done .circle{border-color:var(--ok);background:var(--ok);color:#fff}
+.stepper .dot.done .label{color:var(--ok)}
+.stepper .dot:not(:last-child)::after{content:"";position:absolute;top:18px;left:calc(50% + 22px);right:-22px;height:6px;border-radius:3px;background:#cfd8dc}
+.stepper .dot.done:not(:last-child)::after{background:var(--ok)}
+.stepper .dot.active:not(:last-child)::after{background:var(--pri)}
+.step{display:none}.step.active{display:block}
+.guidelines{background:#e8f1fd;border:1px solid #d6e6ff;padding:10px 12px;border-radius:8px;margin:8px 0 14px;color:#0d47a1}
+label{display:block;font-weight:600;margin:12px 0 6px}
+.input-wrapper{position:relative}
+input[type="text"],input[type="tel"],select{width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:8px;font-size:15px}
+input[type="file"]{width:100%;padding:10px;border:1.5px dashed var(--bd);border-radius:8px;background:#fbfbfb}
+.small{color:#5d6a76;font-size:13px;margin-top:4px}
+.note{font-size:12.5px;color:#5d6a76;margin:3px 0 8px}
+.error-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--err);font-weight:900;display:none}
+.invalid{border-color:var(--err)!important;background:#fff6f6}
+.invalid + .error-icon{display:inline}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.uprow{display:flex;gap:8px;align-items:center}
+.uprow .file{flex:1}
+.actions{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+button{border:none;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
+.btn{background:var(--pri);color:#fff}.btn:hover{background:var(--pri2)}
+.btn-grey{background:#eceff1;color:#243039}.btn-grey:hover{background:#dfe5ea}
+.btn-cap{background:#1976d2;color:#fff;white-space:nowrap}
+.review{list-style:none;padding:0;border:1px solid #edf0f3;border-radius:8px}
+.review li{padding:10px 12px;border-bottom:1px solid #edf0f3}.review li:last-child{border-bottom:none}
+.center{display:flex;align-items:center;justify-content:center}
+.loader{position:fixed;inset:0;background:#ffffffef;display:none;flex-direction:column;gap:10px;z-index:1000}
+.spinner{width:52px;height:52px;border:6px solid #e6edf7;border-top:6px solid var(--pri);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.popup{position:fixed;inset:0;background:#00000020;display:none;align-items:center;justify-content:center;z-index:1001}
+.box{background:#fff;border-radius:12px;min-width:260px;max-width:92vw;padding:18px;border:2px solid #e3f5e7;text-align:center}
+.box.err{border-color:#ffd7d7}
+.box h3{margin:8px 0 6px}
+.ok{color:#2e7d32;font-size:24px}.err{color:#c62828;font-size:24px}
+.camera{position:fixed;inset:0;background:#00000088;display:none;align-items:center;justify-content:center;z-index:1002}
+.camera .wrap{background:#fff;border-radius:12px;padding:12px;width:340px}
+video{width:100%;background:#000;border-radius:8px}
+#thumbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.thumb{width:78px;height:58px;object-fit:cover;border:2px solid #e3e7ee;border-radius:6px}
+.counter{font-size:12px;color:#5d6a76;margin-left:8px}
+.badge{display:inline-block;background:#e8f1fd;border:1px solid #cfe0ff;padding:2px 6px;border-radius:6px;font-size:12px;color:#0d47a1;margin-left:6px}
+.warn{color:#8d6e63;font-size:12px}
+@media(max-width:560px){.row{flex-direction:column}.uprow{flex-direction:column;align-items:stretch}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800">
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
-        <header class="text-center mb-8">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Emblem_of_Hanoi.svg/100px-Emblem_of_Hanoi.svg.png" alt="Logo Thủ đô Hà Nội" class="mx-auto mb-4 h-24">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Cổng Tiếp Nhận Hồ Sơ Đất Đai</h1>
-            <p class="mt-2 text-slate-600">Vui lòng cung cấp thông tin và tải lên các giấy tờ cần thiết theo hướng dẫn.</p>
-        </header>
+<body>
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Emblem_of_Hanoi.svg/671px-Emblem_of_Hanoi.svg.png" alt="Logo" />
+  <h1>Hệ thống Kê khai Thông tin Đất đai</h1>
+</header>
 
-        <div id="submitter-info" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-            <h2 class="text-2xl font-bold mb-6 border-b pb-4 text-slate-900">I. Thông Tin Người Nộp Hồ Sơ</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
-                    <input type="text" id="fullName" class="w-full p-3 rounded-lg bg-slate-100 border-2 border-transparent focus:bg-white focus:border-blue-500 focus:outline-none transition" placeholder="Ví dụ: Nguyễn Văn A">
-                </div>
-                <div>
-                    <label for="idNumber" class="block text-sm font-medium text-slate-700 mb-1">Số Căn cước công dân <span class="text-red-500">*</span></label>
-                    <input type="text" id="idNumber" class="w-full p-3 rounded-lg bg-slate-100 border-2 border-transparent focus:bg-white focus:border-blue-500 focus:outline-none transition" placeholder="Nhập 12 số trên thẻ">
-                </div>
-                <div>
-                    <label for="phoneNumber" class="block text-sm font-medium text-slate-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
-                    <input type="text" id="phoneNumber" class="w-full p-3 rounded-lg bg-slate-100 border-2 border-transparent focus:bg-white focus:border-blue-500 focus:outline-none transition" placeholder="Để chúng tôi liên hệ khi cần">
-                </div>
-                <div>
-                    <label for="landAddress" class="block text-sm font-medium text-slate-700 mb-1">Địa chỉ thửa đất <span class="text-red-500">*</span></label>
-                    <input type="text" id="landAddress" class="w-full p-3 rounded-lg bg-slate-100 border-2 border-transparent focus:bg-white focus:border-blue-500 focus:outline-none transition" placeholder="Ví dụ: Số 1, đường ABC, phường XYZ...">
-                </div>
-            </div>
-        </div>
+<div class="container">
+  <div class="stepper" id="stepper">
+    <div class="dot active"><div class="circle">1</div><div class="label">Thông tin</div></div>
+    <div class="dot"><div class="circle">2</div><div class="label">Tài liệu</div></div>
+    <div class="dot"><div class="circle">3</div><div class="label">Xác nhận</div></div>
+  </div>
 
-        <main class="bg-white p-6 rounded-2xl shadow-lg">
-             <h2 class="text-2xl font-bold mb-6 border-b pb-4 text-slate-900">II. Tải Lên Giấy Tờ</h2>
-             <div class="space-y-6">
-                 <!-- Section 1 -->
-                <div class="upload-section border border-slate-200 p-4 rounded-lg" data-type="certificate">
-                    <p class="font-semibold text-lg">1. Giấy chứng nhận quyền sử dụng đất, quyền sở hữu nhà ở</p>
-                    <p class="text-sm text-slate-500 mb-4">(Bản phô tô hoặc ảnh chụp đầy đủ các trang)</p>
-                    <div class="flex gap-4">
-                        <button class="upload-btn flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Tải lên tệp</button>
-                        <button class="capture-btn flex-1 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Chụp ảnh</button>
-                    </div>
-                    <div class="preview mt-2"></div>
-                    <input type="file" class="hidden file-input" accept="image/*,application/pdf">
-                </div>
-                <!-- Section 2 -->
-                 <div class="upload-section border border-slate-200 p-4 rounded-lg" data-type="idCard">
-                    <p class="font-semibold text-lg">2. Căn cước công dân của (các) chủ sở hữu</p>
-                    <p class="text-sm text-slate-500 mb-4">(Nếu Giấy chứng nhận cấp cho nhiều người, vui lòng cung cấp CCCD của tất cả)</p>
-                    <div class="flex gap-4">
-                        <button class="upload-btn flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Tải lên tệp</button>
-                        <button class="capture-btn flex-1 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Chụp ảnh</button>
-                    </div>
-                    <div class="preview mt-2"></div>
-                    <input type="file" class="hidden file-input" accept="image/*,application/pdf">
-                </div>
-                <!-- Section 3 -->
-                 <div class="upload-section border border-slate-200 p-4 rounded-lg" data-type="otherDocs">
-                    <p class="font-semibold text-lg">3. Các giấy tờ khác liên quan (nếu có)</p>
-                     <p class="text-sm text-slate-500 mb-4">(Ví dụ: Phiếu hẹn trả kết quả, giấy tờ thừa kế, thế chấp...)</p>
-                    <div class="flex gap-4">
-                        <button class="upload-btn flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Tải lên tệp</button>
-                        <button class="capture-btn flex-1 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Chụp ảnh</button>
-                    </div>
-                    <div class="preview mt-2"></div>
-                    <input type="file" class="hidden file-input" accept="image/*,application/pdf">
-                </div>
-             </div>
-        </main>
-        
-        <div id="submit-section" class="mt-8 text-center">
-            <button id="submit-btn" class="w-full md:w-auto bg-indigo-600 text-white font-bold py-4 px-12 rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 flex items-center justify-center mx-auto">
-                <span id="submit-btn-text">Gửi Toàn Bộ Hồ Sơ</span>
-                <div id="submit-loader" class="loader hidden ml-3"></div>
-            </button>
-            <p id="upload-status" class="text-slate-600 mt-4 h-6"></p>
+  <form id="form" autocomplete="off">
+    <div class="step active" id="s1">
+      <div class="guidelines">Điền thông tin và chọn đúng TDP (1 → 46). Địa chỉ tự ghép “Phường Ba Đình, Thành phố Hà Nội”.</div>
+      <label>Họ và tên *</label>
+      <div class="input-wrapper"><input type="text" id="fullName" required placeholder="Ví dụ: Nguyễn Văn A" /><span class="error-icon">!</span></div>
+      <label>Số CCCD *</label>
+      <div class="input-wrapper"><input type="text" id="cccd" required placeholder="Ví dụ: 012345678901" /><span class="error-icon">!</span></div>
+      <div class="row">
+        <div>
+          <label>Số nhà, ngõ, ngách *</label>
+          <div class="input-wrapper"><input type="text" id="addr" required placeholder="Ví dụ: 12 Ngõ 3, Ngách 2" /><span class="error-icon">!</span></div>
         </div>
-
-        <div id="success-message" class="hidden text-center bg-white p-8 rounded-2xl shadow-lg mt-8">
-             <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <h2 class="text-2xl font-bold mt-4 text-slate-900">Gửi Hồ Sơ Thành Công!</h2>
-            <p class="mt-2 text-slate-600">Cảm ơn bạn đã cung cấp hồ sơ. Chúng tôi sẽ xem xét và liên hệ lại với bạn nếu cần thêm thông tin.</p>
+        <div>
+          <label>Tổ dân phố (TDP) *</label>
+          <div class="input-wrapper"><select id="tdp" required><option value="">-- Chọn TDP --</option></select><span class="error-icon">!</span></div>
         </div>
+      </div>
+      <label>Điện thoại *</label>
+      <div class="input-wrapper"><input type="tel" id="phone" required placeholder="Ví dụ: 0912345678" /><span class="error-icon">!</span></div>
+      <div class="actions"><span class="warn">Lưu ý: Điền đủ mới tiếp tục.</span><button type="button" class="btn" id="next1">Tiếp tục</button></div>
     </div>
 
-    <!-- Modals -->
-    <div id="camera-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            <div class="p-4 border-b"><h3 class="text-xl font-semibold">Chụp ảnh tài liệu</h3></div>
-            <div class="p-4">
-                <video id="camera-stream" class="w-full h-auto bg-slate-200 rounded" autoplay playsinline></video>
-                <canvas id="camera-canvas" class="hidden"></canvas>
-            </div>
-            <div class="p-4 flex justify-between items-center bg-slate-50">
-                <div id="photo-preview-container" class="flex gap-2 items-center"></div>
-                <div class="flex gap-2">
-                     <button id="capture-photo-btn" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600">Chụp</button>
-                    <button id="save-photos-btn" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600">Lưu thành PDF</button>
-                    <button id="close-modal-btn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600">Đóng</button>
-                </div>
-            </div>
+    <div class="step" id="s2">
+      <div class="guidelines">Có thể “Chọn tệp” hoặc “Chụp ảnh”. Ảnh chụp nhiều tấm sẽ tự ghép thành PDF.</div>
+
+      <label>1) Giấy chứng nhận đất (Sổ đỏ) <span class="badge">bắt buộc</span></label>
+      <div class="uprow">
+        <input class="file" type="file" id="fileGCN" accept="image/*,.pdf" required />
+        <div class="center" style="gap:8px">
+          <button type="button" class="btn-cap cap" data-type="gcn">📷 Chụp ảnh</button>
+          <span class="counter" id="ct_gcn">0 ảnh</span>
         </div>
-    </div>
-    <div id="alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3 text-center">
-            <p id="alert-message" class="mb-4 text-lg"></p>
-            <button id="close-alert-btn" class="bg-blue-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-600">Đã hiểu</button>
+      </div>
+      <div class="note">Gợi ý: Chụp từng mặt giấy rõ nét; hệ thống tạo giay-chung-nhan.pdf.</div>
+
+      <label>2) Căn cước công dân (CCCD) <span class="badge">bắt buộc</span></label>
+      <div class="uprow">
+        <input class="file" type="file" id="fileCCCD" accept="image/*,.pdf" required />
+        <div class="center" style="gap:8px">
+          <button type="button" class="btn-cap cap" data-type="cccd">📷 Chụp ảnh</button>
+          <span class="counter" id="ct_cccd">0 ảnh</span>
         </div>
+      </div>
+      <div class="note">Gợi ý: Chụp mặt trước CCCD; hệ thống tạo can-cuoc.pdf.</div>
+
+      <label>3) Giấy tờ khác (nếu có)</label>
+      <div class="note">Chọn loại hoặc “Khác” rồi ghi tên để cán bộ dễ nhận biết.</div>
+      <div class="row">
+        <div class="small">
+          <label><input type="checkbox" name="other" value="Phiếu hẹn trả kết quả"> Phiếu hẹn trả kết quả — giấy hẹn trả hồ sơ của cơ quan nhà nước.</label><br/>
+          <label><input type="checkbox" name="other" value="Hợp đồng mua bán"> Hợp đồng mua bán — chứng minh nguồn gốc giao dịch.</label><br/>
+          <label><input type="checkbox" name="other" value="Sổ hộ khẩu"> Sổ hộ khẩu — xác minh nhân khẩu liên quan.</label><br/>
+          <label><input type="checkbox" id="otherChk" name="other" value="Khác"> Khác — tự nhập tên văn bản.</label>
+        </div>
+        <div><input type="text" id="otherName" placeholder="Tên giấy tờ khác (ví dụ: Giấy ủy quyền)" style="display:none" /></div>
+      </div>
+      <div class="uprow" style="margin-top:8px">
+        <input class="file" type="file" id="fileOther" accept="image/*,.pdf" />
+        <div class="center" style="gap:8px">
+          <button type="button" class="btn-cap cap" data-type="other">📷 Chụp ảnh</button>
+          <span class="counter" id="ct_other">0 ảnh</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-grey" id="back2">Quay lại</button>
+        <button type="button" class="btn" id="next2">Tiếp tục</button>
+      </div>
     </div>
 
-    <script>
-        // SCRIPT ĐÃ ĐƯỢC CẬP NHẬT VỚI URL MỚI NHẤT CỦA BẠN
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz96u7m_0bk2wfLOTiAICccZhjpLEGR70Gp_KydqMeeEO350nym5wQ7l4gwIuR7CP8g6A/exec";
-        
-        const uploadedFiles = { certificate: null, idCard: null, otherDocs: null };
-        let currentUploadSection = null;
-        let capturedPhotos = [];
+    <div class="step" id="s3">
+      <div class="guidelines">Kiểm tra lại trước khi gửi.</div>
+      <ul class="review" id="review">
+        <li><b>Họ và tên:</b> <span id="rvName"></span></li>
+        <li><b>CCCD:</b> <span id="rvCCCD"></span></li>
+        <li><b>Địa chỉ:</b> <span id="rvAddr"></span></li>
+        <li><b>Điện thoại:</b> <span id="rvPhone"></span></li>
+        <li><b>Giấy tờ khác:</b> <span id="rvOther"></span></li>
+      </ul>
+      <div class="actions">
+        <button type="button" class="btn-grey" id="back3">Quay lại</button>
+        <button type="submit" class="btn">Gửi hồ sơ</button>
+      </div>
+    </div>
+  </form>
+</div>
 
-        // --- Event Listeners and UI handlers (No changes) ---
-        document.querySelectorAll('.upload-section').forEach(section => {
-            section.querySelector('.upload-btn').addEventListener('click', () => section.querySelector('.file-input').click());
-            section.querySelector('.file-input').addEventListener('change', (event) => handleFileSelect(event, section));
-            section.querySelector('.capture-btn').addEventListener('click', () => openCamera(section));
-        });
-        document.getElementById('submit-btn').addEventListener('click', handleFormSubmit);
-        document.getElementById('close-modal-btn').addEventListener('click', closeCamera);
-        document.getElementById('capture-photo-btn').addEventListener('click', capturePhoto);
-        document.getElementById('save-photos-btn').addEventListener('click', savePhotosAsPdf);
-        document.getElementById('close-alert-btn').addEventListener('click', () => document.getElementById('alert-modal').classList.add('hidden'));
+<div class="loader center" id="loader"><div class="spinner"></div><div>Đang xử lý, vui lòng đợi…</div></div>
+<div class="popup" id="okPop"><div class="box"><div class="ok">✓</div><h3>Gửi hồ sơ thành công</h3><div>Thông tin đã được ghi nhận.</div></div></div>
+<div class="popup" id="errPop"><div class="box err"><div class="err">✕</div><h3>Gửi hồ sơ thất bại</h3><div id="errMsg">Đã xảy ra lỗi.</div></div></div>
 
-        function handleFileSelect(event, section) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const dataType = section.dataset.type;
-            uploadedFiles[dataType] = file;
-            updatePreview(section, file);
-        }
+<div class="camera" id="cam">
+  <div class="wrap">
+    <video id="vid" playsinline autoplay></video>
+    <div id="thumbs"></div>
+    <div class="actions" style="margin-top:10px">
+      <div class="small">Có thể chụp tối đa 15 ảnh/lần để đảm bảo ổn định.</div>
+      <div>
+        <button type="button" class="btn-grey" id="btnCloseCam">Đóng</button>
+        <button type="button" class="btn-cap" id="btnShot">📸 Chụp</button>
+        <button type="button" class="btn" id="btnMakePdf">Tạo PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        function updatePreview(section, file) {
-            const previewContainer = section.querySelector('.preview');
-            previewContainer.innerHTML = `<div class="file-info"><div class="flex items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span class="font-medium">${file.name}</span><span class="text-sm text-slate-500">${(file.size / 1024 / 1024).toFixed(2)} MB</span></div><button class="remove-file-btn text-red-500 hover:text-red-700">&times;</button></div>`;
-            previewContainer.querySelector('.remove-file-btn').addEventListener('click', () => {
-                uploadedFiles[section.dataset.type] = null;
-                previewContainer.innerHTML = '';
-                section.querySelector('.file-input').value = '';
-            });
-        }
-        
-        async function openCamera(section) {
-            currentUploadSection = section; capturedPhotos = []; updatePhotoPreview();
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showAlert("Trình duyệt của bạn không hỗ trợ camera."); return; }
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                document.getElementById('camera-stream').srcObject = stream;
-                document.getElementById('camera-modal').classList.remove('hidden');
-            } catch (err) { showAlert("Không thể truy cập camera. Vui lòng cấp quyền."); }
-        }
-        function closeCamera() {
-            const video = document.getElementById('camera-stream');
-            if (video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
-            document.getElementById('camera-modal').classList.add('hidden');
-        }
-        function capturePhoto() {
-            const video = document.getElementById('camera-stream'); const canvas = document.getElementById('camera-canvas');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedPhotos.push(canvas.toDataURL('image/jpeg')); updatePhotoPreview();
-        }
-        function updatePhotoPreview() {
-            const container = document.getElementById('photo-preview-container');
-            container.innerHTML = capturedPhotos.map(src => `<img src="${src}" class="h-10 w-auto rounded border-2 border-blue-500">`).join('');
-            if (capturedPhotos.length > 0) container.innerHTML += `<span class="ml-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">${capturedPhotos.length} ảnh</span>`;
-        }
-        async function savePhotosAsPdf() {
-            if (capturedPhotos.length === 0) { showAlert("Bạn chưa chụp ảnh nào."); return; }
-            const { PDFDocument } = PDFLib; const pdfDoc = await PDFDocument.create();
-            for (const dataUrl of capturedPhotos) {
-                const jpgImage = await pdfDoc.embedJpg(await fetch(dataUrl).then(res => res.arrayBuffer()));
-                const page = pdfDoc.addPage([jpgImage.width, jpgImage.height]);
-                page.drawImage(jpgImage, { width: jpgImage.width, height: jpgImage.height });
-            }
-            const pdfBytes = await pdfDoc.save(); const pdfFile = new File([pdfBytes], "anh_chup_tai_lieu.pdf", { type: "application/pdf" });
-            uploadedFiles[currentUploadSection.dataset.type] = pdfFile; updatePreview(currentUploadSection, pdfFile); closeCamera();
-        }
-        
-        function showAlert(message) {
-            document.getElementById('alert-message').textContent = message;
-            document.getElementById('alert-modal').classList.remove('hidden');
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(()=>{const {jsPDF}=window.jspdf;
+// DOM & state
+const form=document.getElementById('form'),steps=[document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3')],dots=[...document.getElementById('stepper').querySelectorAll('.dot')],loader=document.getElementById('loader'),okPop=document.getElementById('okPop'),errPop=document.getElementById('errPop'),errMsg=document.getElementById('errMsg');
+const fullName=document.getElementById('fullName'),cccd=document.getElementById('cccd'),addr=document.getElementById('addr'),tdp=document.getElementById('tdp'),phone=document.getElementById('phone');
+const fileGCN=document.getElementById('fileGCN'),fileCCCD=document.getElementById('fileCCCD'),fileOther=document.getElementById('fileOther'),otherChk=document.getElementById('otherChk'),otherName=document.getElementById('otherName');
+const rvName=document.getElementById('rvName'),rvCCCD=document.getElementById('rvCCCD'),rvAddr=document.getElementById('rvAddr'),rvPhone=document.getElementById('rvPhone'),rvOther=document.getElementById('rvOther');
+const cam=document.getElementById('cam'),vid=document.getElementById('vid'),thumbs=document.getElementById('thumbs'),btnShot=document.getElementById('btnShot'),btnCloseCam=document.getElementById('btnCloseCam'),btnMakePdf=document.getElementById('btnMakePdf');
+const ct_gcn=document.getElementById('ct_gcn'),ct_cccd=document.getElementById('ct_cccd'),ct_other=document.getElementById('ct_other');
+let current=0,stream=null,shots=[],camTarget=null;
 
-        // --- FINAL, ROBUST UPLOAD LOGIC ---
+document.addEventListener('DOMContentLoaded',()=>{for(let i=1;i<=46;i++){const op=document.createElement('option');op.value=i;op.textContent='TDP '+i;tdp.appendChild(op);}});
 
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
+otherChk.addEventListener('change',()=>{otherName.style.display=otherChk.checked?'block':'none';});
 
-        async function handleFormSubmit() {
-            const submitBtn = document.getElementById('submit-btn');
-            const statusEl = document.getElementById('upload-status');
-            const loader = document.getElementById('submit-loader');
-            const btnText = document.getElementById('submit-btn-text');
+function setStep(n){current=n;steps.forEach((s,i)=>s.classList.toggle('active',i===n));dots.forEach((d,i)=>{d.classList.toggle('active',i===n);d.classList.toggle('done',i<n);d.querySelector('.circle').textContent=i<n?'✓':(i+1);});}
+function need(el){const wrap=el.closest('.input-wrapper')||el;if(!el.value||el.value.toString().trim()===''){el.classList.add('invalid');const ic=wrap.querySelector('.error-icon');if(ic)ic.style.display='inline';return false}else{el.classList.remove('invalid');const ic=wrap.querySelector('.error-icon');if(ic)ic.style.display='none';return true}}
+function validateStep(n){let ok=true;if(n===0){[fullName,cccd,addr,tdp,phone].forEach(x=>ok=need(x)&&ok);}if(n===1){[fileGCN,fileCCCD].forEach(x=>ok=need(x)&&ok);if(otherChk.checked&&!otherName.value.trim()){otherName.classList.add('invalid');ok=false}else otherName.classList.remove('invalid');}return ok;}
+document.getElementById('next1').onclick=()=>{if(!validateStep(0))return;setStep(1);};
+document.getElementById('back2').onclick=()=>setStep(0);
+document.getElementById('next2').onclick=()=>{if(!validateStep(1))return;rvName.textContent=fullName.value;rvCCCD.textContent=cccd.value;rvAddr.textContent=addr.value&&tdp.value?`${addr.value}, TDP ${tdp.value}, Phường Ba Đình, Thành phố Hà Nội`:'';rvPhone.textContent=phone.value;const chosen=[...document.querySelectorAll('input[name="other"]:checked')].map(el=>el.value==='Khác'&&otherName.value.trim()?`Khác (${otherName.value.trim()})`:el.value);rvOther.textContent=chosen.length?chosen.join(', '):'Không';setStep(2);};
+document.getElementById('back3').onclick=()=>setStep(1);
+document.addEventListener('input',e=>{if(e.target.matches('input,select')&&e.target.value&&e.target.value.trim()!==''){e.target.classList.remove('invalid');const wrap=e.target.closest('.input-wrapper');const ic=wrap&&wrap.querySelector('.error-icon');if(ic)ic.style.display='none';}});
 
-            const fullName = document.getElementById('fullName').value.trim();
-            const idNumber = document.getElementById('idNumber').value.trim();
-            if (!fullName || !idNumber) { showAlert("Vui lòng điền Họ tên và Số CCCD."); return; }
-            const filesToProcess = Object.entries(uploadedFiles).filter(([key, file]) => file !== null);
-            if (filesToProcess.length === 0) { showAlert("Vui lòng tải lên ít nhất một loại giấy tờ."); return; }
+// Camera open
+document.querySelectorAll('.cap').forEach(btn=>btn.addEventListener('click',async()=>{camTarget=btn.dataset.type;shots=[];thumbs.innerHTML='';cam.style.display='flex';try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('Trình duyệt không hỗ trợ camera. Vui lòng dùng Chọn tệp.');closeCam();return;}stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});vid.srcObject=stream;await vid.play();}catch(err){alert('Không thể truy cập camera: '+err.message+'\nHãy kiểm tra quyền camera trong cài đặt trình duyệt.');closeCam();}}));
+function closeCam(){cam.style.display='none';if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+btnCloseCam.onclick=closeCam;
 
-            submitBtn.disabled = true;
-            btnText.textContent = 'Đang xử lý...';
-            loader.classList.remove('hidden');
-            statusEl.textContent = 'Đang đóng gói và gửi hồ sơ. Vui lòng chờ...';
+function appendThumb(data){const im=new Image();im.src=data;im.className='thumb';im.title='Nhấn để xóa ảnh';im.onclick=()=>{shots=shots.filter(x=>x!==data);im.remove();updateCounter();};thumbs.appendChild(im);}
+function updateCounter(){const n=shots.length;if(camTarget==='gcn')ct_gcn.textContent=n+' ảnh';if(camTarget==='cccd')ct_cccd.textContent=n+' ảnh';if(camTarget==='other')ct_other.textContent=n+' ảnh';}
 
-            try {
-                const payload = { fullName, idNumber, files: {} };
+btnShot.onclick=()=>{if(!vid.videoWidth){alert('Camera chưa sẵn sàng.');return;}if(shots.length>=15){alert('Tối đa 15 ảnh/lần để đảm bảo ổn định.');return;}const cv=document.createElement('canvas');cv.width=vid.videoWidth;cv.height=vid.videoHeight;cv.getContext('2d').drawImage(vid,0,0,cv.width,cv.height);if(cv.toBlob){cv.toBlob(blb=>{const r=new FileReader();r.onload=()=>{shots.push(r.result);appendThumb(r.result);updateCounter();};r.readAsDataURL(blb);},'image/jpeg',0.9);}else{const data=cv.toDataURL('image/jpeg',0.9);shots.push(data);appendThumb(data);updateCounter();}};
 
-                statusEl.textContent = 'Đang chuẩn bị dữ liệu...';
-                for (const [key, file] of filesToProcess) {
-                    payload.files[key] = {
-                        name: file.name,
-                        type: file.type,
-                        base64: await fileToBase64(file)
-                    };
-                }
+btnMakePdf.onclick=async()=>{if(shots.length===0){alert('Chưa chụp ảnh nào.');return;}try{const pdf=new jsPDF();shots.forEach((url,i)=>{const prop=pdf.getImageProperties(url);const w=pdf.internal.pageSize.getWidth();const h=prop.height*w/prop.width;if(i>0)pdf.addPage();pdf.addImage(url,'JPEG',0,0,w,h);});let blob;if(typeof pdf.getBlob==='function'){blob=await new Promise(resolve=>pdf.getBlob(resolve));}else if(pdf.output){const out=pdf.output('blob');if(out)blob=out;else{const dataUrl=pdf.output('datauristring');blob=await fetch(dataUrl).then(r=>r.blob());}}else{const dataUrl=pdf.output('datauristring');blob=await fetch(dataUrl).then(r=>r.blob());}const name=camTarget==='gcn'?'giay-chung-nhan.pdf':camTarget==='cccd'?'can-cuoc.pdf':(otherChk.checked&&otherName.value.trim()?otherName.value.trim().replace(/[^\w\d\-._]/g,'_').toLowerCase()+'.pdf':'giay-to-khac.pdf');const file=new File([blob],name,{type:'application/pdf'});const dt=new DataTransfer();dt.items.add(file);if(camTarget==='gcn')fileGCN.files=dt.files;else if(camTarget==='cccd')fileCCCD.files=dt.files;else fileOther.files=dt.files;closeCam();}catch(ex){alert('Không tạo được PDF: '+ex.message+'\nHãy thử chụp ít ảnh hơn hoặc dùng Chọn tệp.');}};
 
-                statusEl.textContent = 'Đang gửi đến máy chủ...';
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-                    body: JSON.stringify(payload),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Lỗi kết nối đến máy chủ: ${response.statusText} (${response.status})`);
-                }
-                
-                const result = await response.json();
-
-                if (result.status !== 'success') {
-                    throw new Error(result.message || "Máy chủ báo lỗi không xác định.");
-                }
-                
-                statusEl.textContent = 'Hoàn tất!';
-                document.getElementById('submitter-info').classList.add('hidden');
-                document.querySelector('main').classList.add('hidden');
-                document.getElementById('submit-section').classList.add('hidden');
-                document.getElementById('success-message').classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Submission Error:', error);
-                showAlert(`Gửi hồ sơ thất bại: ${error.message}`);
-                submitBtn.disabled = false;
-                btnText.textContent = 'Gửi Toàn Bộ Hồ Sơ';
-                loader.classList.add('hidden');
-                statusEl.textContent = 'Gửi hồ sơ thất bại. Vui lòng thử lại.';
-            }
-        }
-    </script>
+// Submit
+form.addEventListener('submit',async e=>{e.preventDefault();loader.style.display='flex';const toB64=f=>new Promise((res,rej)=>{if(!f){res(null);return;}const r=new FileReader();r.onload=()=>res({fileName:f.name,mimeType:f.type,data:r.result.split(',')[1]});r.onerror=rej;r.readAsDataURL(f);});try{const payload={fullName:fullName.value,cccd:cccd.value.startsWith("'")?cccd.value:"'"+cccd.value,address:`${addr.value}, TDP ${tdp.value}, Phường Ba Đình, Thành phố Hà Nội`,phone:phone.value.startsWith("'")?phone.value:"'"+phone.value,fileGCN:await toB64(fileGCN.files[0]),fileCCCD:await toB64(fileCCCD.files[0]),fileOther:await toB64(fileOther.files[0]||null)};google.script.run.withSuccessHandler(res=>{loader.style.display='none';if(res&&res.status==='success'){okPop.style.display='flex';setTimeout(()=>{okPop.style.display='none';form.reset();ct_gcn.textContent='0 ảnh';ct_cccd.textContent='0 ảnh';ct_other.textContent='0 ảnh';setStep(0);},2400);}else{errMsg.textContent=(res&&res.message)?res.message:'Không xác định';errPop.style.display='flex';setTimeout(()=>errPop.style.display='none',3200);}}).withFailureHandler(err=>{loader.style.display='none';errMsg.textContent='Lỗi kỹ thuật: '+(err&&err.message?err.message:'Không xác định');errPop.style.display='flex';setTimeout(()=>errPop.style.display='none',3200);}).processForm(payload);}catch(ex){loader.style.display='none';errMsg.textContent='Lỗi trình duyệt: '+ex.message;errPop.style.display='flex';setTimeout(()=>errPop.style.display='none',3200);}});
+dots.forEach((d,i)=>d.addEventListener('click',()=>{if(i<current)setStep(i);}));setStep(0);
+})();
+</script>
 </body>
 </html>
-
